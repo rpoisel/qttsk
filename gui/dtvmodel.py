@@ -1,11 +1,11 @@
 import types
 from PySide import QtCore, QtGui
-from dtvaccess import DTVAccess
 
 
 class DynamicTreeViewNode(object):
 
     def __init__(self, name=None, data=None, parent=None, icon=None):
+        super(DynamicTreeViewNode, self).__init__()
         self.Name = name
         self.Data = data
         self.Parent = parent
@@ -13,51 +13,51 @@ class DynamicTreeViewNode(object):
         self.Icon = icon
 
     def getName(self):
-        return self.__name
+        return self._name
 
     def setName(self, value):
-        self.__name = value
+        self._name = value
 
     Name = property(getName, setName)
 
     def getIcon(self):
-        return self.__icon
+        return self._icon
 
     def setIcon(self, value):
         if isinstance(value, QtGui.QIcon):
-            self.__icon = value
+            self._icon = value
         elif isinstance(value, basestring):
-            self.__icon = QtGui.QIcon(value)
+            self._icon = QtGui.QIcon(value)
         else:
-            self.__icon = None
+            self._icon = None
 
     Icon = property(getIcon, setIcon)
 
     def getData(self):
-        return self.__data
+        return self._data
 
     def setData(self, value):
-        self.__data = value
+        self._data = value
 
     Data = property(getData, setData)
 
     def getParent(self):
-        return self.__parent
+        return self._parent
 
     def setParent(self, parent):
         if parent is not None:
-            self.__parent = parent
-            self.__parent.appendCild(self)
+            self._parent = parent
+            self._parent.appendCild(self)
         else:
-            self.__parent = None
+            self._parent = None
 
     Parent = property(getParent, setParent)
 
     def getChildren(self):
-        return self.__children
+        return self._children
 
     def setChildren(self, value):
-        self.__children = value
+        self._children = value
 
     Children = property(getChildren, setChildren)
 
@@ -89,24 +89,6 @@ class DynamicTreeViewModel(QtCore.QAbstractItemModel):
         self.Header = headerColumns
 
         self.Root = DynamicTreeViewNode('rootNode', None)
-        self.__fetchMoreFunc = None
-        self.__dataParserFunc = None
-        self.__hasChildrenFunc = None
-        self.__accessCls = None
-
-    def getAccessClass(self):
-        return self.__accessCls
-
-    def setAccessClass(self, cls):
-        if isinstance(cls, DTVAccess):
-            self.__accessCls = cls
-            self.__fetchMoreFunc = self.__accessCls.addItems
-            self.__dataParserFunc = self.__accessCls.parseData
-            self.__hasChildrenFunc = self.__accessCls.hasChildren
-        else:
-            raise TypeError("Class must be a Subclass of \"DTVAccess\"")
-
-    AccessClass = property(getAccessClass, setAccessClass)
 
     def getHeader(self):
         return self.__headers
@@ -118,10 +100,10 @@ class DynamicTreeViewModel(QtCore.QAbstractItemModel):
     Header = property(getHeader, setHeader)
 
     def getRoot(self):
-        return self.__root
+        return self._root
 
     def setRoot(self, node):
-        self.__root = node
+        self._root = node
 
     Root = property(getRoot, setRoot)
 
@@ -156,11 +138,8 @@ class DynamicTreeViewModel(QtCore.QAbstractItemModel):
                 else:
                     return None
             else:
-                if self.__dataParserFunc is not None:
-                    return QtGui.QIcon(self.__dataParserFunc(node,
-                        index.column() - 1, role))
-                else:
-                    return None
+                return QtGui.QIcon(self.parseData(node,
+                    index.column() - 1, role))
             return None
 
         if role == QtCore.Qt.TextAlignmentRole:
@@ -171,9 +150,7 @@ class DynamicTreeViewModel(QtCore.QAbstractItemModel):
         if index.column() == 0:
             return node.Name
         else:
-            if self.__dataParserFunc is not None:
-                return self.__dataParserFunc(node, index.column() - 1)
-            return None
+            return self.parseData(node, index.column() - 1)
 
     def columnCount(self, parent):
         return self.columns
@@ -209,28 +186,29 @@ class DynamicTreeViewModel(QtCore.QAbstractItemModel):
         return self.createIndex(row, 0, parent)
 
     def nodeFromIndex(self, index):
-        return index.internalPointer() if index.isValid() else self.__root
+        return index.internalPointer() if index.isValid() else self._root
 
     def hasChildren(self, parent):
         node = self.nodeFromIndex(parent)
-        return self.__hasChildrenFunc(node)
+        # invoke method from dtvaccess_tsk
+        return self.hasChildrenImpl(node)
 
     def canFetchMore(self, parent):
         if not parent.isValid():
             return False
         else:
             parentNode = parent.internalPointer()
-            if self.__hasChildrenFunc(parentNode):
+            if self.hasChildrenImpl(parentNode):
                 if len(parentNode.Children) > 0:
                     return False
             return True
 
     def fetchMore(self, parent):
-        if self.__fetchMoreFunc is not None:
-            self.__fetchMoreFunc(self, parent.internalPointer())
+        self.addItems(self, parent.internalPointer())
+        #self.__fetchMoreFunc(self, parent.internalPointer())
 
     def addRoot(self, name, data, icon=None):
-        self.addItem(self.__root, name, data, icon)
+        self.addItem(self._root, name, data, icon)
 
     def addItem(self, parentNode, name, data, icon=None):
         DynamicTreeViewNode(name, data, parentNode, icon)

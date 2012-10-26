@@ -3,20 +3,21 @@ import os
 from PySide import QtCore
 
 import os_wrapper
-from dtvaccess import NodeData, DTVAccess
 
 
-class TskNodeData(NodeData):
+class TskNodeData(object):
 
     def __init__(self, data, hasChildren, parent=None):
+        super(TskNodeData, self).__init__()
         self.metadata = data
         self.hasChildren = hasChildren
         self.parent = parent
 
 
-class TskDTVAccess(DTVAccess):
+class TskDTVAccess(object):
 
     def __init__(self):
+        super(TskDtvAccess, self).__init__()
         self.imageset = False
 
     def setImage(self, image, offset=0):
@@ -104,7 +105,7 @@ class TskDTVAccess(DTVAccess):
                 return node.Data.metadata[index + 1]
         return None
 
-    def hasChildren(self, node):
+    def hasChildrenImpl(self, node):
         if node.Data is not None:
             return node.Data.hasChildren
         return True

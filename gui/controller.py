@@ -25,8 +25,9 @@ from PySide import QtUiTools
 import gui_resources
 import os_wrapper
 from model_vsc import CModelVsc
-from dtvmodel import DynamicTreeViewModel
-from dtvaccess_tsk import TskDTVAccess, TskNodeData
+#from dtvmodel import DynamicTreeViewModel
+#from dtvaccess_tsk import TskDTVAccess, TskNodeData
+from dtvmodel_tsk import DynamicTreeViewModelTsk
 
 
 # Create a class for our main window
@@ -44,8 +45,6 @@ class CMain(object):
         self.mainwidget = lLoader.load(":/forms/mainwidget.ui")
 
         self.ui.setCentralWidget(self.mainwidget)
-
-        self.mHash = hashlib.sha1()
 
         # initialize widgets
 
@@ -69,14 +68,14 @@ class CMain(object):
                 os.getcwd(),
                 "All Files (*)")[0]
         if self.mFilename != "":
-            self.mModel = DynamicTreeViewModel(["Name", "Filetype", "iNode"])
-            self.mModel.addRoot("/",
-                    TskNodeData(["/", None, None], True),
-                    os.path.join("gui", "icons", "b.png"))
-            self.mTreeAccess = TskDTVAccess()
-            self.mModel.AccessClass = self.mTreeAccess
-            self.mTreeAccess.setImage(self.mFilename,
+            #self.mModel = DynamicTreeViewModel(["Name", "Filetype", "iNode"])
+            self.mModel = DynamicTreeViewModelTsk()
+            self.mModel.setImage(self.mFilename,
                     self.mainwidget.offset.text())
+            #self.mTreeAccess = TskDTVAccess()
+            #self.mModel.AccessClass = self.mTreeAccess
+            #self.mTreeAccess.setImage(self.mFilename,
+            #        self.mainwidget.offset.text())
             self.mainwidget.tskTree.setModel(self.mModel)
             self.mainwidget.tskTree.header().setStretchLastSection(False)
             self.mainwidget.tskTree.header().setResizeMode(0,
@@ -137,11 +136,12 @@ class CMain(object):
         lOutput = self.__getInodeData()
         # stdout: lOutput[0]
         # stderr: lOutput[1]
-        self.mHash.update(lOutput[0])
+        lHash = hashlib.sha1()
+        lHash.update(lOutput[0])
         with open(os.path.join(self.mainwidget.outputDir.text(),
             self.mainwidget.filename.text() + ".hash"),
                 "wb") as lFH:
-            lFH.write(self.mHash.hexdigest())
+            lFH.write(lHash.hexdigest())
 
     def on_actionExit_triggered(self):
         self.ui.close()
