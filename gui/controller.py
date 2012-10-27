@@ -68,14 +68,10 @@ class CMain(object):
                 os.getcwd(),
                 "All Files (*)")[0]
         if self.mFilename != "":
-            #self.mModel = DynamicTreeViewModel(["Name", "Filetype", "iNode"])
-            self.mModel = DynamicTreeViewModelTsk()
-            self.mModel.setImage(self.mFilename,
-                    self.mainwidget.offset.text())
-            #self.mTreeAccess = TskDTVAccess()
-            #self.mModel.AccessClass = self.mTreeAccess
-            #self.mTreeAccess.setImage(self.mFilename,
-            #        self.mainwidget.offset.text())
+            self.mModel = DynamicTreeViewModelTsk(
+                    self.mFilename,
+                    self.mainwidget.offset.text()
+                    )
             self.mainwidget.tskTree.setModel(self.mModel)
             self.mainwidget.tskTree.header().setStretchLastSection(False)
             self.mainwidget.tskTree.header().setResizeMode(0,

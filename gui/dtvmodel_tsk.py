@@ -9,7 +9,7 @@ from dtvmodel import DynamicTreeViewModel
 
 class DynamicTreeViewModelTsk(DynamicTreeViewModel, TskDTVAccess):
 
-    def __init__(self):
+    def __init__(self, pImage, pOffset):
         super(DynamicTreeViewModelTsk, self).__init__(
                 ["Name", "Filetype", "iNode"]
                 )
@@ -21,3 +21,4 @@ class DynamicTreeViewModelTsk(DynamicTreeViewModel, TskDTVAccess):
                     ),
                 os.path.join("gui", "icons", "b.png")
                 )
+        self.setImage(pImage, pOffset)
