@@ -83,6 +83,7 @@ class TskDTVAccess(object):
         items = self.getData(parentNode.Data.metadata[2])
 
         for item in items:
+            # TODO check this a little bit further
             canExpand = True if item[1][:1] == "d" else False
             DTreeView.addItem(parentNode,
                     item[0],

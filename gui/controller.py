@@ -117,15 +117,18 @@ class CMain(object):
         return os_wrapper.runCommand(lCommand)
 
     def on_export_clicked(self):
-        lOutput = self.__getInodeData()
-        # stdout: lOutput[0]
-        # stderr: lOutput[1]
-        with open(os.path.join(self.mainwidget.outputDir.text(),
-            self.mainwidget.filename.text()),
-                "wb") as lFH:
-            lFH.write(lOutput[0])
-        if len(lOutput) > 1 and lOutput[1] is not None:
-            print "Status: " + lOutput[1]
+        print self.mModel.rowCount(
+                self.mainwidget.tskTree.currentIndex()
+                )
+#        lOutput = self.__getInodeData()
+#        # stdout: lOutput[0]
+#        # stderr: lOutput[1]
+#        with open(os.path.join(self.mainwidget.outputDir.text(),
+#            self.mainwidget.filename.text()),
+#                "wb") as lFH:
+#            lFH.write(lOutput[0])
+#        if len(lOutput) > 1 and lOutput[1] is not None:
+#            print "Status: " + lOutput[1]
 
     def on_hash_clicked(self):
         # TODO put this into a try-except block
