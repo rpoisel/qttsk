@@ -103,49 +103,67 @@ class CMain(object):
         if lFilename != "":
             self.mainwidget.outputDir.setText(lFilename)
 
-    def __getInodeData(self):
+    def __prepareRecursion(self):
         if self.mainwidget.outputDir.text() == "":
             self.on_output_dir_clicked()
         if self.mainwidget.outputDir.text() == "":
-            return
-        if self.mainwidget.inode.text() == "":
-            # what shall be exported?
-            return
-        lCommand = ["icat",
-                "-o " + self.mainwidget.offset.text(),
-                self.mFilename,
-            self.mainwidget.inode.text()
-            ]
-        return os_wrapper.runCommand(lCommand)
+            return QtCore.QModelIndex()
+        return self.mainwidget.tskTree.currentIndex()
 
-    def __recurse(self, pIdxParent, pPath=""):
-        lPath = os.path.join(
-                pPath,
-                self.mModel.data(pIdxParent, QtCore.Qt.DisplayRole)
-                )
-        if self.mModel.hasChildren(pIdxParent):
-            print "Creating directory: " + lPath
-        else:
-            print "Exporting: " + lPath
-        lNumChildren = self.mModel.rowCount(pIdxParent)
-        if lNumChildren > 0:
-            for lRowChild in range(lNumChildren):
-                lIdxChild = self.mModel.index(lRowChild, 0, pIdxParent)
-                self.__recurse(lIdxChild, lPath)
+    def __icat(self, pFilename, pOffset, pInode):
+        lCommand = [
+                "icat",
+                "-o " + pOffset,
+                pFilename,
+                pInode
+                ]
+        return os_wrapper.runCommand(lCommand)[0]
+
+    def __recurse(self, pIdxParent, pPathBase, pFunc, pPath=""):
+        try:
+            lNode = self.mModel.nodeFromIndex(pIdxParent).Data.metadata
+            lPath = os.path.join(
+                    pPathBase,
+                    pPath,
+                    lNode[0]
+                    )
+            if self.mModel.hasChildren(pIdxParent):
+                # lPath refers to a directory
+                if not os.path.exists(lPath):
+                    os.mkdir(lPath)
+                elif not os.path.isdir(lPath):
+                    raise Exception("Could not create directory.")
+            else:
+                pFunc(lPath, lNode[2])
+            lNumChildren = self.mModel.rowCount(pIdxParent)
+            if lNumChildren > 0:
+                for lRowChild in range(lNumChildren):
+                    lIdxChild = self.mModel.index(lRowChild, 0, pIdxParent)
+                    self.__recurse(lIdxChild, pPathBase, pFunc, lPath)
+        except OSError, lExc:
+            # could not create directory
+            pass
+
+    def __exportFunc(self, pPath, pInode):
+        if pInode == '0':
+            return
+        with open(pPath, "wb") as lFH:
+            lFH.write(
+                    self.__icat(
+                        self.mFilename,
+                        self.mainwidget.offset.text(),
+                        pInode
+                        )
+                    )
 
     def on_export_clicked(self):
-        lIndex = self.mainwidget.tskTree.currentIndex()
+        lIndex = self.__prepareRecursion()
         if lIndex.isValid():
-            self.__recurse(lIndex)
-#        lOutput = self.__getInodeData()
-#        # stdout: lOutput[0]
-#        # stderr: lOutput[1]
-#        with open(os.path.join(self.mainwidget.outputDir.text(),
-#            self.mainwidget.filename.text()),
-#                "wb") as lFH:
-#            lFH.write(lOutput[0])
-#        if len(lOutput) > 1 and lOutput[1] is not None:
-#            print "Status: " + lOutput[1]
+            self.__recurse(
+                    lIndex,
+                    self.mainwidget.outputDir.text(),
+                    self.__exportFunc
+                    )
 
     def on_hash_clicked(self):
         # TODO put this into a try-except block
