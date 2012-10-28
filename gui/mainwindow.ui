@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Volume Shadow Copy Analyzer</string>
+   <string>QtTsk - Qt Frontend for The Sleuthkit</string>
   </property>
   <property name="windowIcon">
    <iconset>

@@ -79,7 +79,7 @@
       </widget>
      </item>
      <item row="1" column="5">
-      <widget class="QPushButton" name="hashButton">
+      <widget class="QPushButton" name="reportButton">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -90,7 +90,7 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>&amp;Hash</string>
+        <string>&amp;Report</string>
        </property>
       </widget>
      </item>

@@ -20,3 +20,13 @@ def runCommand(pCommand, pRedirectStderr=True):
     else:
         lOutput = Popen(pCommand, stdout=PIPE).communicate()
     return lOutput
+
+
+def icat(pFilename, pOffset, pInode):
+    lCommand = [
+            "icat",
+            "-o " + pOffset,
+            pFilename,
+            pInode
+            ]
+    return runCommand(lCommand)[0]
