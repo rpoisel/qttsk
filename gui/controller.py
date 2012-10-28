@@ -63,10 +63,12 @@ class CMain(object):
                 self.on_file_clicked)
 
     def on_input_dir_clicked(self):
-        self.mFilename = QtGui.QFileDialog.getOpenFileName(self.ui,
-                "Choose Image",
-                os.getcwd(),
-                "All Files (*)")[0]
+#        self.mFilename = QtGui.QFileDialog.getOpenFileName(self.ui,
+#                "Choose Image",
+#                os.getcwd(),
+#                "All Files (*)")[0]
+        self.mFilename = "/home/rpoisel/git/mmc/data/usbkey.dd"
+        self.mainwidget.offset.setText("51")
         if self.mFilename != "":
             self.mModel = DynamicTreeViewModelTsk(
                     self.mFilename,
@@ -116,10 +118,25 @@ class CMain(object):
             ]
         return os_wrapper.runCommand(lCommand)
 
-    def on_export_clicked(self):
-        print self.mModel.rowCount(
-                self.mainwidget.tskTree.currentIndex()
+    def __recurse(self, pIdxParent, pPath=""):
+        lPath = os.path.join(
+                pPath,
+                self.mModel.data(pIdxParent, QtCore.Qt.DisplayRole)
                 )
+        if self.mModel.hasChildren(pIdxParent):
+            print "Creating directory: " + lPath
+        else:
+            print "Exporting: " + lPath
+        lNumChildren = self.mModel.rowCount(pIdxParent)
+        if lNumChildren > 0:
+            for lRowChild in range(lNumChildren):
+                lIdxChild = self.mModel.index(lRowChild, 0, pIdxParent)
+                self.__recurse(lIdxChild, lPath)
+
+    def on_export_clicked(self):
+        lIndex = self.mainwidget.tskTree.currentIndex()
+        if lIndex.isValid():
+            self.__recurse(lIndex)
 #        lOutput = self.__getInodeData()
 #        # stdout: lOutput[0]
 #        # stderr: lOutput[1]
