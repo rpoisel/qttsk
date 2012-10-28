@@ -62,12 +62,12 @@ class CMain(object):
                 self.on_file_clicked)
 
     def on_input_dir_clicked(self):
-#        self.mFilename = QtGui.QFileDialog.getOpenFileName(self.ui,
-#                "Choose Image",
-#                os.getcwd(),
-#                "All Files (*)")[0]
-        self.mFilename = "/home/rpoisel/git/mmc/data/usbkey.dd"
-        self.mainwidget.offset.setText("51")
+        self.mFilename = QtGui.QFileDialog.getOpenFileName(self.ui,
+                "Choose Image",
+                os.getcwd(),
+                "All Files (*)")[0]
+#        self.mFilename = "/home/rpoisel/git/mmc/data/usbkey.dd"
+#        self.mainwidget.offset.setText("51")
         if self.mFilename != "":
             self.mModel = DynamicTreeViewModelTsk(
                     self.mFilename,
