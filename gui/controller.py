@@ -157,7 +157,7 @@ class CMain(object):
         if pInode == '0':
             lHashDigest = ''
         else:
-            lHash = hashlib.sha1()
+            lHash = hashlib.md5()
             lHash.update(os_wrapper.icat(
                 self.mFilename,
                 self.mainwidget.offset.text(),
