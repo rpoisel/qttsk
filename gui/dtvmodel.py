@@ -10,6 +10,7 @@ class DynamicTreeViewNode(object):
         self.Data = data
         self.Parent = parent
         self.Children = []
+        self.childrenLoaded = False
         self.Icon = icon
 
     def getName(self):
@@ -47,7 +48,7 @@ class DynamicTreeViewNode(object):
     def setParent(self, parent):
         if parent is not None:
             self._parent = parent
-            self._parent.appendCild(self)
+            self._parent.appendChild(self)
         else:
             self._parent = None
 
@@ -61,7 +62,7 @@ class DynamicTreeViewNode(object):
 
     Children = property(getChildren, setChildren)
 
-    def appendCild(self, child):
+    def appendChild(self, child):
         self.Children.append(child)
 
     def childAtRow(self, row):
@@ -159,6 +160,9 @@ class DynamicTreeViewModel(QtCore.QAbstractItemModel):
         node = self.nodeFromIndex(parent)
         if node is None:
             return 0
+        if len(node) == 0 and node.childrenLoaded is False \
+                and self.hasChildren(parent):
+            self.fetchMore(parent)
         return len(node)
 
     def parent(self, child):
@@ -190,7 +194,6 @@ class DynamicTreeViewModel(QtCore.QAbstractItemModel):
 
     def hasChildren(self, parent):
         node = self.nodeFromIndex(parent)
-        # invoke method from dtvaccess_tsk
         return self.hasChildrenImpl(node)
 
     def canFetchMore(self, parent):
@@ -204,8 +207,9 @@ class DynamicTreeViewModel(QtCore.QAbstractItemModel):
             return True
 
     def fetchMore(self, parent):
-        self.addItems(self, parent.internalPointer())
-        #self.__fetchMoreFunc(self, parent.internalPointer())
+        node = parent.internalPointer()
+        self.addItems(self, node)
+        node.childrenLoaded = True
 
     def addRoot(self, name, data, icon=None):
         self.addItem(self._root, name, data, icon)

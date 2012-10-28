@@ -7,10 +7,10 @@ import os_wrapper
 
 class TskNodeData(object):
 
-    def __init__(self, data, hasChildren, parent=None):
+    def __init__(self, data, isDir, parent=None):
         super(TskNodeData, self).__init__()
         self.metadata = data
-        self.hasChildren = hasChildren
+        self.isDir = isDir
         self.parent = parent
 
 
@@ -25,7 +25,7 @@ class TskDTVAccess(object):
         self.offset = offset
         self.imageset = True
 
-    def getData(self, inode=None):
+    def __getData(self, inode=None):
 
         if self.imageset is False:
             return []
@@ -80,14 +80,13 @@ class TskDTVAccess(object):
 
     def addItems(self, DTreeView, parentNode):
 
-        items = self.getData(parentNode.Data.metadata[2])
+        items = self.__getData(parentNode.Data.metadata[2])
 
         for item in items:
-            # TODO check this a little bit further
-            canExpand = True if item[1][:1] == "d" else False
+            isDir = True if item[1][:1] == "d" else False
             DTreeView.addItem(parentNode,
                     item[0],
-                    TskNodeData(item, canExpand, parentNode),
+                    TskNodeData(item, isDir, parentNode),
                     os.path.join("gui", "icons", item[1][:1] + ".png"))
 
     def parseData(self, node, index, role=None):
@@ -108,5 +107,5 @@ class TskDTVAccess(object):
 
     def hasChildrenImpl(self, node):
         if node.Data is not None:
-            return node.Data.hasChildren
+            return node.Data.isDir
         return True
