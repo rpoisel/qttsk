@@ -55,6 +55,8 @@ class TskDTVAccess(object):
             inodeStart = metadaten.find("*")
             if inodeStart == -1:
                 inodeStart = metadaten.find(" ")
+            else:
+                inodeStart = inodeStart + 1
             inodeEnd = metadaten.find("(")
             if inodeEnd == -1:
                 inode = metadaten[inodeStart + 1:].strip()
