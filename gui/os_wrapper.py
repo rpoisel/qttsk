@@ -24,7 +24,7 @@ def runCommand(pCommand, pRedirectStderr=True):
 
 def icat(pFilename, pOffset, pInode):
     lCommand = [
-            "icat",
+            "icat-sleuthkit",
             "-o " + pOffset,
             pFilename,
             pInode
